@@ -195,6 +195,7 @@ export {
   makePendingTextMessage,
   messageExplodeDescriptions,
   pathToAttachmentType,
+  previewSpecs,
   rpcErrorToString,
   serviceMessageTypeToMessageTypes,
   uiMessageEditToMessage,

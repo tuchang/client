@@ -48,7 +48,7 @@ func (c *ChatUI) ChatAttachmentUploadProgress(ctx context.Context, arg chat1.Cha
 	return nil
 }
 
-func (c *ChatUI) ChatAttachmentUploadDone(context.Context, int) error {
+func (c *ChatUI) ChatAttachmentUploadDone(ctx context.Context, arg chat1.ChatAttachmentUploadDoneArg) error {
 	if c.noOutput {
 		return nil
 	}
@@ -66,7 +66,8 @@ func (c *ChatUI) ChatAttachmentPreviewUploadStart(context.Context, chat1.ChatAtt
 	return nil
 }
 
-func (c *ChatUI) ChatAttachmentPreviewUploadDone(context.Context, int) error {
+func (c *ChatUI) ChatAttachmentPreviewUploadDone(ctx context.Context,
+	arg chat1.ChatAttachmentPreviewUploadDoneArg) error {
 	if c.noOutput {
 		return nil
 	}

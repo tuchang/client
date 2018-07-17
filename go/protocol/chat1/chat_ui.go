@@ -756,28 +756,35 @@ type ChatAttachmentUploadOutboxIDArg struct {
 }
 
 type ChatAttachmentUploadStartArg struct {
-	SessionID        int           `codec:"sessionID" json:"sessionID"`
-	Metadata         AssetMetadata `codec:"metadata" json:"metadata"`
-	PlaceholderMsgID MessageID     `codec:"placeholderMsgID" json:"placeholderMsgID"`
+	SessionID int            `codec:"sessionID" json:"sessionID"`
+	ConvID    ConversationID `codec:"convID" json:"convID"`
+	OutboxID  OutboxID       `codec:"outboxID" json:"outboxID"`
 }
 
 type ChatAttachmentUploadProgressArg struct {
-	SessionID     int   `codec:"sessionID" json:"sessionID"`
-	BytesComplete int64 `codec:"bytesComplete" json:"bytesComplete"`
-	BytesTotal    int64 `codec:"bytesTotal" json:"bytesTotal"`
+	SessionID     int            `codec:"sessionID" json:"sessionID"`
+	ConvID        ConversationID `codec:"convID" json:"convID"`
+	OutboxID      OutboxID       `codec:"outboxID" json:"outboxID"`
+	BytesComplete int64          `codec:"bytesComplete" json:"bytesComplete"`
+	BytesTotal    int64          `codec:"bytesTotal" json:"bytesTotal"`
 }
 
 type ChatAttachmentUploadDoneArg struct {
-	SessionID int `codec:"sessionID" json:"sessionID"`
+	SessionID int            `codec:"sessionID" json:"sessionID"`
+	ConvID    ConversationID `codec:"convID" json:"convID"`
+	OutboxID  OutboxID       `codec:"outboxID" json:"outboxID"`
 }
 
 type ChatAttachmentPreviewUploadStartArg struct {
-	SessionID int           `codec:"sessionID" json:"sessionID"`
-	Metadata  AssetMetadata `codec:"metadata" json:"metadata"`
+	SessionID int            `codec:"sessionID" json:"sessionID"`
+	ConvID    ConversationID `codec:"convID" json:"convID"`
+	OutboxID  OutboxID       `codec:"outboxID" json:"outboxID"`
 }
 
 type ChatAttachmentPreviewUploadDoneArg struct {
-	SessionID int `codec:"sessionID" json:"sessionID"`
+	SessionID int            `codec:"sessionID" json:"sessionID"`
+	ConvID    ConversationID `codec:"convID" json:"convID"`
+	OutboxID  OutboxID       `codec:"outboxID" json:"outboxID"`
 }
 
 type ChatAttachmentDownloadStartArg struct {
@@ -839,9 +846,9 @@ type ChatUiInterface interface {
 	ChatAttachmentUploadOutboxID(context.Context, ChatAttachmentUploadOutboxIDArg) error
 	ChatAttachmentUploadStart(context.Context, ChatAttachmentUploadStartArg) error
 	ChatAttachmentUploadProgress(context.Context, ChatAttachmentUploadProgressArg) error
-	ChatAttachmentUploadDone(context.Context, int) error
+	ChatAttachmentUploadDone(context.Context, ChatAttachmentUploadDoneArg) error
 	ChatAttachmentPreviewUploadStart(context.Context, ChatAttachmentPreviewUploadStartArg) error
-	ChatAttachmentPreviewUploadDone(context.Context, int) error
+	ChatAttachmentPreviewUploadDone(context.Context, ChatAttachmentPreviewUploadDoneArg) error
 	ChatAttachmentDownloadStart(context.Context, int) error
 	ChatAttachmentDownloadProgress(context.Context, ChatAttachmentDownloadProgressArg) error
 	ChatAttachmentDownloadDone(context.Context, int) error
@@ -918,7 +925,7 @@ func ChatUiProtocol(i ChatUiInterface) rpc.Protocol {
 						err = rpc.NewTypeError((*[]ChatAttachmentUploadDoneArg)(nil), args)
 						return
 					}
-					err = i.ChatAttachmentUploadDone(ctx, (*typedArgs)[0].SessionID)
+					err = i.ChatAttachmentUploadDone(ctx, (*typedArgs)[0])
 					return
 				},
 				MethodType: rpc.MethodCall,
@@ -950,7 +957,7 @@ func ChatUiProtocol(i ChatUiInterface) rpc.Protocol {
 						err = rpc.NewTypeError((*[]ChatAttachmentPreviewUploadDoneArg)(nil), args)
 						return
 					}
-					err = i.ChatAttachmentPreviewUploadDone(ctx, (*typedArgs)[0].SessionID)
+					err = i.ChatAttachmentPreviewUploadDone(ctx, (*typedArgs)[0])
 					return
 				},
 				MethodType: rpc.MethodCall,
@@ -1154,8 +1161,7 @@ func (c ChatUiClient) ChatAttachmentUploadProgress(ctx context.Context, __arg Ch
 	return
 }
 
-func (c ChatUiClient) ChatAttachmentUploadDone(ctx context.Context, sessionID int) (err error) {
-	__arg := ChatAttachmentUploadDoneArg{SessionID: sessionID}
+func (c ChatUiClient) ChatAttachmentUploadDone(ctx context.Context, __arg ChatAttachmentUploadDoneArg) (err error) {
 	err = c.Cli.Call(ctx, "chat.1.chatUi.chatAttachmentUploadDone", []interface{}{__arg}, nil)
 	return
 }
@@ -1165,8 +1171,7 @@ func (c ChatUiClient) ChatAttachmentPreviewUploadStart(ctx context.Context, __ar
 	return
 }
 
-func (c ChatUiClient) ChatAttachmentPreviewUploadDone(ctx context.Context, sessionID int) (err error) {
-	__arg := ChatAttachmentPreviewUploadDoneArg{SessionID: sessionID}
+func (c ChatUiClient) ChatAttachmentPreviewUploadDone(ctx context.Context, __arg ChatAttachmentPreviewUploadDoneArg) (err error) {
 	err = c.Cli.Call(ctx, "chat.1.chatUi.chatAttachmentPreviewUploadDone", []interface{}{__arg}, nil)
 	return
 }

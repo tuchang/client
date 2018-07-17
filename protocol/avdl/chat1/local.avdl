@@ -765,8 +765,8 @@ protocol local {
   }
 
   // Post an attachment from file source to conversationID.
-  PostLocalRes postFileAttachmentLocal(PostFileAttachmentArg arg);
-  PostLocalNonblockRes postFileAttachmentLocalNonblock(PostFileAttachmentArg arg);
+  PostLocalRes postFileAttachmentLocal(int sessionID, PostFileAttachmentArg arg);
+  PostLocalNonblockRes postFileAttachmentLocalNonblock(int sessionID, PostFileAttachmentArg arg);
 
   record DownloadAttachmentLocalRes {
     boolean offline;

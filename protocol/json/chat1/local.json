@@ -3217,6 +3217,10 @@
     "postFileAttachmentLocal": {
       "request": [
         {
+          "name": "sessionID",
+          "type": "int"
+        },
+        {
           "name": "arg",
           "type": "PostFileAttachmentArg"
         }
@@ -3225,6 +3229,10 @@
     },
     "postFileAttachmentLocalNonblock": {
       "request": [
+        {
+          "name": "sessionID",
+          "type": "int"
+        },
         {
           "name": "arg",
           "type": "PostFileAttachmentArg"

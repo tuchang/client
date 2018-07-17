@@ -24,11 +24,12 @@ func (r *RemoteChatUI) ChatAttachmentUploadOutboxID(ctx context.Context, arg cha
 	return r.cli.ChatAttachmentUploadOutboxID(ctx, arg)
 }
 
-func (r *RemoteChatUI) ChatAttachmentUploadStart(ctx context.Context, metadata chat1.AssetMetadata, placeholder chat1.MessageID) error {
+func (r *RemoteChatUI) ChatAttachmentUploadStart(ctx context.Context, convID chat1.ConversationID,
+	outboxID chat1.OutboxID) error {
 	arg := chat1.ChatAttachmentUploadStartArg{
-		SessionID:        r.sessionID,
-		Metadata:         metadata,
-		PlaceholderMsgID: placeholder,
+		SessionID: r.sessionID,
+		ConvID:    convID,
+		OutboxID:  outboxID,
 	}
 	return r.cli.ChatAttachmentUploadStart(ctx, arg)
 }
@@ -38,20 +39,32 @@ func (r *RemoteChatUI) ChatAttachmentUploadProgress(ctx context.Context, arg cha
 	return r.cli.ChatAttachmentUploadProgress(ctx, arg)
 }
 
-func (r *RemoteChatUI) ChatAttachmentUploadDone(ctx context.Context) error {
-	return r.cli.ChatAttachmentUploadDone(ctx, r.sessionID)
+func (r *RemoteChatUI) ChatAttachmentUploadDone(ctx context.Context, convID chat1.ConversationID,
+	outboxID chat1.OutboxID) error {
+	return r.cli.ChatAttachmentUploadDone(ctx, chat1.ChatAttachmentUploadDoneArg{
+		SessionID: r.sessionID,
+		ConvID:    convID,
+		OutboxID:  outboxID,
+	})
 }
 
-func (r *RemoteChatUI) ChatAttachmentPreviewUploadStart(ctx context.Context, metadata chat1.AssetMetadata) error {
+func (r *RemoteChatUI) ChatAttachmentPreviewUploadStart(ctx context.Context, convID chat1.ConversationID,
+	outboxID chat1.OutboxID) error {
 	arg := chat1.ChatAttachmentPreviewUploadStartArg{
 		SessionID: r.sessionID,
-		Metadata:  metadata,
+		ConvID:    convID,
+		OutboxID:  outboxID,
 	}
 	return r.cli.ChatAttachmentPreviewUploadStart(ctx, arg)
 }
 
-func (r *RemoteChatUI) ChatAttachmentPreviewUploadDone(ctx context.Context) error {
-	return r.cli.ChatAttachmentPreviewUploadDone(ctx, r.sessionID)
+func (r *RemoteChatUI) ChatAttachmentPreviewUploadDone(ctx context.Context, convID chat1.ConversationID,
+	outboxID chat1.OutboxID) error {
+	return r.cli.ChatAttachmentPreviewUploadDone(ctx, chat1.ChatAttachmentPreviewUploadDoneArg{
+		SessionID: r.sessionID,
+		ConvID:    convID,
+		OutboxID:  outboxID,
+	})
 }
 
 func (r *RemoteChatUI) ChatAttachmentDownloadStart(ctx context.Context) error {

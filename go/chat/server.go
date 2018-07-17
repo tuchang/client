@@ -1490,42 +1490,43 @@ func (h *Server) initiateAttachmentUpload(ctx context.Context, arg chat1.PostFil
 	return uresChan, msg, nil
 }
 
-func (h *Server) PostFileAttachmentLocalNonblock(ctx context.Context, arg chat1.PostFileAttachmentArg) (res chat1.PostLocalNonblockRes, err error) {
+func (h *Server) PostFileAttachmentLocalNonblock(ctx context.Context,
+	arg chat1.PostFileAttachmentLocalNonblockArg) (res chat1.PostLocalNonblockRes, err error) {
 	var identBreaks []keybase1.TLFIdentifyFailure
-	ctx = Context(ctx, h.G(), arg.IdentifyBehavior, &identBreaks, h.identNotifier)
+	ctx = Context(ctx, h.G(), arg.Arg.IdentifyBehavior, &identBreaks, h.identNotifier)
 	defer h.Trace(ctx, func() error { return err }, "PostFileAttachmentLocalNonblock")()
 	defer func() { h.setResultRateLimit(ctx, &res) }()
 	if os.Getenv("CHAT_S3_FAKE") == "1" {
 		ctx = s3.NewFakeS3Context(ctx)
 	}
-	_, msg, err := h.initiateAttachmentUpload(ctx, arg)
+	_, msg, err := h.initiateAttachmentUpload(ctx, arg.Arg)
 	if err != nil {
 		return res, err
 	}
 	return h.PostLocalNonblock(ctx, chat1.PostLocalNonblockArg{
-		ConversationID:   arg.ConversationID,
-		IdentifyBehavior: arg.IdentifyBehavior,
+		ConversationID:   arg.Arg.ConversationID,
+		IdentifyBehavior: arg.Arg.IdentifyBehavior,
 		Msg:              msg,
 		OutboxID:         msg.ClientHeader.OutboxID,
 	})
 }
 
 // PostFileAttachmentLocal implements chat1.LocalInterface.PostFileAttachmentLocal.
-func (h *Server) PostFileAttachmentLocal(ctx context.Context, arg chat1.PostFileAttachmentArg) (res chat1.PostLocalRes, err error) {
+func (h *Server) PostFileAttachmentLocal(ctx context.Context, arg chat1.PostFileAttachmentLocalArg) (res chat1.PostLocalRes, err error) {
 	var identBreaks []keybase1.TLFIdentifyFailure
-	ctx = Context(ctx, h.G(), arg.IdentifyBehavior, &identBreaks, h.identNotifier)
+	ctx = Context(ctx, h.G(), arg.Arg.IdentifyBehavior, &identBreaks, h.identNotifier)
 	defer h.Trace(ctx, func() error { return err }, "PostFileAttachmentLocal")()
 	defer func() { h.setResultRateLimit(ctx, &res) }()
 	if os.Getenv("CHAT_S3_FAKE") == "1" {
 		ctx = s3.NewFakeS3Context(ctx)
 	}
 
-	uresChan, msg, err := h.initiateAttachmentUpload(ctx, arg)
+	uresChan, msg, err := h.initiateAttachmentUpload(ctx, arg.Arg)
 	// Wait for upload
 	ures := <-uresChan
 	attachment := chat1.MessageAttachment{
 		Object:   ures.Object,
-		Metadata: arg.Metadata,
+		Metadata: arg.Arg.Metadata,
 		Uploaded: true,
 	}
 	if ures.Preview != nil {
@@ -1537,8 +1538,8 @@ func (h *Server) PostFileAttachmentLocal(ctx context.Context, arg chat1.PostFile
 
 	h.Debug(ctx, "postAttachmentLocal: attachment assets uploaded, posting attachment message")
 	plres, err := h.PostLocal(ctx, chat1.PostLocalArg{
-		ConversationID:   arg.ConversationID,
-		IdentifyBehavior: arg.IdentifyBehavior,
+		ConversationID:   arg.Arg.ConversationID,
+		IdentifyBehavior: arg.Arg.IdentifyBehavior,
 		Msg:              msg,
 	})
 	if err != nil {

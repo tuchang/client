@@ -368,6 +368,33 @@ const clampAttachmentPreviewSize = ({width = 0, height = 0}) =>
         width: clamp(width || 0, 0, maxAttachmentPreviewSize),
       }
 
+export const previewSpecs = (preview: ?RPCChatTypes.AssetMetadata, full: ?RPCChatTypes.AssetMetadata) => {
+  const res = {
+    height: 0,
+    width: 0,
+    attachmentType: 'file',
+    showPlayButton: false,
+  }
+  if (preview) {
+    if (preview.assetType === RPCChatTypes.localAssetMetadataType.image && preview.image) {
+      const wh = clampAttachmentPreviewSize(preview.image)
+      res.height = wh.height
+      res.width = wh.width
+      res.attachmentType = 'image'
+      // full is a video but preview is an image?
+      if (full && full.assetType === RPCChatTypes.localAssetMetadataType.video) {
+        res.showPlayButton = true
+      }
+    } else if (preview.assetType === RPCChatTypes.localAssetMetadataType.video && preview.video) {
+      const wh = clampAttachmentPreviewSize(preview.video)
+      res.height = wh.height
+      res.width = wh.width
+      res.attachmentType = 'image'
+    }
+  }
+  return res
+}
+
 const validUIMessagetoMessage = (
   conversationIDKey: Types.ConversationIDKey,
   uiMessage: RPCChatTypes.UIMessage,
@@ -438,38 +465,8 @@ const validUIMessagetoMessage = (
         transferState = null
       }
       const {filename, title, size} = attachment.object
-      let previewHeight = 0
-      let previewWidth = 0
-      let attachmentType = 'file'
-      let showPlayButton = false
 
-      if (preview && preview.metadata) {
-        if (
-          preview.metadata.assetType === RPCChatTypes.localAssetMetadataType.image &&
-          preview.metadata.image
-        ) {
-          const wh = clampAttachmentPreviewSize(preview.metadata.image)
-          previewHeight = wh.height
-          previewWidth = wh.width
-          attachmentType = 'image'
-          // full is a video but preview is an image?
-          if (
-            full &&
-            full.metadata &&
-            full.metadata.assetType === RPCChatTypes.localAssetMetadataType.video
-          ) {
-            showPlayButton = true
-          }
-        } else if (
-          preview.metadata.assetType === RPCChatTypes.localAssetMetadataType.video &&
-          preview.metadata.video
-        ) {
-          const wh = clampAttachmentPreviewSize(preview.metadata.video)
-          previewHeight = wh.height
-          previewWidth = wh.width
-          attachmentType = 'image'
-        }
-      }
+      const pre = previewSpecs(preview && preview.metadata, full && full.metadata)
       let previewURL = ''
       let fileURL = ''
       let fileType = ''
@@ -481,15 +478,15 @@ const validUIMessagetoMessage = (
 
       return makeMessageAttachment({
         ...common,
-        attachmentType,
+        attachmentType: pre.attachmentType,
         fileName: filename,
         fileSize: size,
         fileType,
         fileURL,
-        previewHeight,
+        previewHeight: pre.height,
         previewURL,
-        previewWidth,
-        showPlayButton,
+        previewWidth: pre.width,
+        showPlayButton: pre.showPlayButton,
         title,
         transferState,
       })
@@ -690,24 +687,24 @@ export const makePendingTextMessage = (
 export const makePendingAttachmentMessages = (
   state: TypedState,
   conversationIDKey: Types.ConversationIDKey,
-  attachmentTypes: Types.AttachmentType[],
   titles: string[],
   previewURLs: string[],
+  previewSpecs: Types.PreviewSpec[],
   outboxIDs: Types.OutboxID[],
   explodeTime?: number
 ) => {
-  if (attachmentTypes.length - titles.length + previewURLs.length - outboxIDs.length !== 0) {
+  if (previewSpecs.length - titles.length + previewURLs.length - outboxIDs.length !== 0) {
     // some are not the same size. no good.
     throw new Error(
-      `makePendingAttachments: got arrays of differing lengths: (${attachmentTypes.length}, ${
-        titles.length
-      }, ${previewURLs.length}, ${outboxIDs.length})`
+      `makePendingAttachments: got arrays of differing lengths: (${previewSpecs.length}, ${titles.length}, ${
+        previewURLs.length
+      }, ${outboxIDs.length})`
     )
   }
   const lastOrdinal =
     state.chat2.messageOrdinals.get(conversationIDKey, I.List()).last() || Types.numberToOrdinal(0)
   // arbitrarily reduce on attachmentTypes to get the same length
-  const ordinals = attachmentTypes.reduce((ords, _) => {
+  const ordinals = previewSpecs.reduce((ords, _) => {
     if (ords.length === 0) {
       ords.push(nextFractionalOrdinal(lastOrdinal))
       return ords
@@ -719,15 +716,18 @@ export const makePendingAttachmentMessages = (
   const explodeInfo = explodeTime ? {exploding: true, explodingTime: Date.now() + explodeTime * 1000} : {}
 
   const res = []
-  for (let i = 0; i < attachmentTypes.length; i++) {
+  for (let i = 0; i < previewSpecs.length; i++) {
     res.push(
       makeMessageAttachment({
         ...explodeInfo,
-        attachmentType: attachmentTypes[i],
+        attachmentType: previewSpecs[i].attachmentType,
         author: state.config.username || '',
         conversationIDKey,
         deviceName: '',
         previewURL: previewURLs[i],
+        previewWidth: previewSpecs[i].width,
+        previewHeight: previewSpecs[i].height,
+        showPlayButton: previewSpecs[i].showPlayButton,
         deviceType: isMobile ? 'mobile' : 'desktop',
         id: Types.numberToMessageID(0),
         ordinal: ordinals[i],

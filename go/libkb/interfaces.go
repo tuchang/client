@@ -362,11 +362,11 @@ type ProvisionUI interface {
 
 type ChatUI interface {
 	ChatAttachmentUploadOutboxID(context.Context, chat1.ChatAttachmentUploadOutboxIDArg) error
-	ChatAttachmentUploadStart(context.Context, chat1.AssetMetadata, chat1.MessageID) error
+	ChatAttachmentUploadStart(context.Context, chat1.ConversationID, chat1.OutboxID) error
 	ChatAttachmentUploadProgress(context.Context, chat1.ChatAttachmentUploadProgressArg) error
-	ChatAttachmentUploadDone(context.Context) error
-	ChatAttachmentPreviewUploadStart(context.Context, chat1.AssetMetadata) error
-	ChatAttachmentPreviewUploadDone(context.Context) error
+	ChatAttachmentUploadDone(context.Context, chat1.ConversationID, chat1.OutboxID) error
+	ChatAttachmentPreviewUploadStart(context.Context, chat1.ConversationID, chat1.OutboxID) error
+	ChatAttachmentPreviewUploadDone(context.Context, chat1.ConversationID, chat1.OutboxID) error
 	ChatAttachmentDownloadStart(context.Context) error
 	ChatAttachmentDownloadProgress(context.Context, chat1.ChatAttachmentDownloadProgressArg) error
 	ChatAttachmentDownloadDone(context.Context) error
