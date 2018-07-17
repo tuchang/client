@@ -187,7 +187,7 @@ func TestGetMaybeAdminByStringName(t *testing.T) {
 }
 
 func TestGetTeamIDByName(t *testing.T) {
-	_, tcs, cleanup := setupNTests(t, 2)
+	fus, tcs, cleanup := setupNTests(t, 2)
 	defer cleanup()
 
 	teamName, teamID := createTeam2(*tcs[0])
