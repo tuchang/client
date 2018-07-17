@@ -577,7 +577,7 @@ func RequestDetails(ctx context.Context, g *libkb.GlobalContext, requestID stell
 type lookupUnverifiedResult struct {
 	libkb.AppStatusEmbed
 	Users []struct {
-		Uid         keybase1.UID   `json:"uid"`
+		UID         keybase1.UID   `json:"uid"`
 		EldestSeqno keybase1.Seqno `json:"eldest_seqno"`
 	} `json:"users"`
 }
@@ -596,7 +596,7 @@ func LookupUnverified(ctx context.Context, g *libkb.GlobalContext, accountID ste
 		return ret, err
 	}
 	for _, user := range res.Users {
-		ret = append(ret, keybase1.NewUserVersion(user.Uid, user.EldestSeqno))
+		ret = append(ret, keybase1.NewUserVersion(user.UID, user.EldestSeqno))
 	}
 	return ret, nil
 }
